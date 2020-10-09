@@ -61,7 +61,7 @@ func process_source(src string) []ExportedFunction {
 				dtype := src[param.Type.Pos()-1 : param.Type.End()-1]
 				fn.Signature += dtype + ", "
 				part := strings.Split(dtype, ".")[0]
-				part = strings.Trim(part, "[]")
+				part = strings.Trim(part, "[]*")
 				dep, found := imports[part]
 				if !found || added[dep] == 1 {
 					continue
@@ -79,7 +79,7 @@ func process_source(src string) []ExportedFunction {
 				dtype := src[param.Type.Pos()-1 : param.Type.End()-1]
 				fn.Signature += dtype + ", "
 				part := strings.Split(dtype, ".")[0]
-				part = strings.Trim(part, "[]")
+				part = strings.Trim(part, "[]*")
 				dep, found := imports[part]
 				if !found || added[dep] == 1 {
 					continue
