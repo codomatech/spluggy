@@ -98,10 +98,10 @@ func process_source(src string) []ExportedFunction {
 	return funcs
 }
 
-var argfuncname = flag.String("func", "", "The exposed function name")
+var argfuncname = flag.String("func", "", "The interface function name")
 var argbasepkg = flag.String("pkg", "", "The base package")
 var argoutfname = flag.String("out", "plugins.go", "Output file name")
-var argverbose = flag.Bool("v", false, "Enable verbose output")
+var argverbose = flag.Bool("v", false, "Flag to enable verbose output")
 
 func log_Debug(fmtstr string, vars ...interface{}) {
 	if !*argverbose {
