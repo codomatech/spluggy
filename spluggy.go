@@ -25,7 +25,7 @@ func process_source(src string) []ExportedFunction {
 
 	node, err := parser.ParseFile(fset, "", src, parser.ParseComments)
 	if err != nil {
-		log.Println(err)
+		log.Fatalf("Failed to parse source: %+v", err)
 		return nil
 	}
 
@@ -37,7 +37,7 @@ func process_source(src string) []ExportedFunction {
 		parts := strings.Split(path, "/")
 		imports[parts[len(parts)-1]] = path
 	}
-	log.Printf("Imports: %+v\n", imports)
+	log_Debug("Imports: %+v\n", imports)
 
 	funcs := make([]ExportedFunction, 0, len(node.Decls))
 
@@ -67,7 +67,7 @@ func process_source(src string) []ExportedFunction {
 					continue
 				}
 				added[dep] = 1
-				log.Printf("appending dep: %s (%s)\n", part, dtype)
+				log_Debug("appending dep: %s (%s)\n", part, dtype)
 				deps = append(deps, dep)
 			}
 		}
@@ -85,7 +85,7 @@ func process_source(src string) []ExportedFunction {
 					continue
 				}
 				added[dep] = 1
-				log.Printf("appending dep: %s (%s)\n", part, dtype)
+				log_Debug("appending dep: %s (%s)\n", part, dtype)
 				deps = append(deps, dep)
 			}
 			fn.Signature = strings.TrimSuffix(fn.Signature, ", ") + ")"
@@ -101,6 +101,14 @@ func process_source(src string) []ExportedFunction {
 var argfuncname = flag.String("func", "", "The exposed function name")
 var argbasepkg = flag.String("pkg", "", "The base package")
 var argoutfname = flag.String("out", "plugins.go", "Output file name")
+var argverbose = flag.Bool("v", false, "Enable verbose output")
+
+func log_Debug(fmtstr string, vars ...interface{}) {
+	if !*argverbose {
+		return
+	}
+	log.Printf("[DEBUG] "+fmtstr, vars...)
+}
 
 func main() {
 	flag.Parse()
@@ -132,9 +140,9 @@ func main() {
 		if pkg == "" {
 			return nil
 		}
-		log.Printf("About to process file %s (pkg %s)\n", path, pkg)
+		log_Debug("About to process file %s (pkg %s)\n", path, pkg)
 		funcs := process_source(src)
-		log.Printf("resulted functions: %+v\n", funcs)
+		log_Debug("resulted functions: %+v\n", funcs)
 		existingfuncs, found := pkgfuncs[pkg]
 		if !found {
 			existingfuncs = nil
@@ -143,7 +151,7 @@ func main() {
 		return nil
 	})
 
-	log.Printf("pkgfuncs: %+v\n", pkgfuncs)
+	log_Debug("pkgfuncs: %+v\n", pkgfuncs)
 
 	funcocc := make(map[string]int)
 	for _, fns := range pkgfuncs {
@@ -165,7 +173,7 @@ func main() {
 		}
 	}
 
-	//log.Printf("cands: %+v\n", cands)
+	log_Debug("cands: %+v\n", cands)
 	if len(cands) == 0 {
 		flag.Usage()
 		log.Fatalf("Cannot find any common public function in all packages")
@@ -188,7 +196,7 @@ func main() {
 		break
 	}
 
-	//log.Printf("interface function is %s: %+v\n", fname, fn)
+	log_Debug("interface function is %s: %+v\n", fname, fn)
 
 	code := make([]string, 0, len(pkgfuncs)+16)
 
@@ -229,5 +237,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to wrote code to %s: %+v", out, err)
 	}
-	log.Printf("Plugins definition written to %s\n", out)
+	log_Debug("Plugins definition written to %s\n", out)
 }
