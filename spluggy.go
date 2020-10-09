@@ -200,12 +200,17 @@ func main() {
 		code = append(code, fmt.Sprintf("import \"%s\"", dep))
 	}
 
+	i := 0
+	pkg2importname := make(map[string]string)
 	for pkg, _ := range pkgfuncs {
 		p := pkg
 		if len(*argbasepkg) > 0 {
 			p = *argbasepkg + "/" + p
 		}
-		code = append(code, fmt.Sprintf("import %s \"%s\"", pkg, p))
+		importname := fmt.Sprintf("p%d", i)
+		pkg2importname[pkg] = importname
+		code = append(code, fmt.Sprintf("import %s \"%s\"", importname, p))
+		i = i + 1
 	}
 
 	code = append(code, fmt.Sprintf("\ntype Function func%s\n", fn.Signature))
@@ -214,7 +219,7 @@ func main() {
 	code = append(code, "\tplugins := make(map[string]Function)\n")
 
 	for pkg, _ := range pkgfuncs {
-		code = append(code, fmt.Sprintf("\tplugins[\"%s\"] = %s.%s", pkg, pkg, fn.Name))
+		code = append(code, fmt.Sprintf("\tplugins[\"%s\"] = %s.%s", pkg, pkg2importname[pkg], fn.Name))
 	}
 
 	code = append(code, "\n\treturn plugins\n}\n")
