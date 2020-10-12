@@ -28,5 +28,18 @@ With flags:
 
 ```
 
+## Known Limitations
+
+Currently `spluggy` cannot infer struct type dependencies defined within a `map`, e.g.
+
+```go
+// spluggy cannot infer that "somepackage" shoud be imported 
+func Fn(map[somepackage.SomeStructType]int) {
+    ...
+}
+```
+
+This will be addressed in the next version.
+
 ---
 `spluggy` is a work of :heart: by [Codoma.tech](https://www.codoma.tech/).
